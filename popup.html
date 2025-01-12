@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UI Validation Tool</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="header">
+    <h1>UI Validation Tool</h1>
+    <p>User ID: <span id="user-id">dummy_user_123</span></p>
+    <p>Date: <span id="current-date"></span></p>
+  </div>
+
+  <div class="content">
+    <div class="info">
+      <p>Total Tests Available: <span id="total-tests">50</span></p>
+      <p>Total Tests for This Page: <span id="tests-this-page">5</span></p>
+    </div>
+
+    <div class="buttons">
+      <button id="run-scan">Run Scan</button>
+      <button id="upload-tests">Upload Tests to DB</button>
+      <button id="run-tests">Run Tests</button>
+      <button id="show-results">Show Results</button>
+    </div>
+
+    <div id="progress" class="hidden">
+      <p>Scanning... Please wait.</p>
+      <div class="progress-bar"></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <button id="settings-btn">⚙️ Settings</button>
+    <button id="help-btn">❓ Help</button>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
