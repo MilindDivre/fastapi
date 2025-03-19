@@ -528,3 +528,98 @@ ui_elements = [
 
 jira_cases = generate_jira_test_cases(ui_elements)
 print(json.dumps(jira_cases, indent=2))
+
+
+##########################################
+
+
+### **Role:**  
+You are an expert QA engineer specializing in manual testing. Your goal is to analyze the given **UI element** and generate well-structured test cases that cover all possible scenarios.  
+
+---
+
+### **UI Element Details:**  
+- **Tag**: {element['tag']}  
+- **ID**: {element['id']}  
+- **Name**: {element['name']}  
+- **Text/Label**: {element['text']}  
+- **Type**: {element['type']}  
+- **Placeholder**: {element['placeholder']}  
+- **Disabled**: {element['disabled']}  
+- **Required**: {element['required']}  
+- **Max Length**: {element['maxlength']}  
+- **Href (if applicable)**: {element['href']}  
+
+---
+
+### **Thought Process Before Generating Test Cases:**  
+🔹 **Step 1: Understand the Purpose of the Element**  
+   - What is its role on the page?  
+   - How does a user interact with it?  
+   - Is it mandatory or optional?  
+
+🔹 **Step 2: Identify Functional Scenarios**  
+   - What are the expected behaviors?  
+   - How should it respond to valid/invalid inputs?  
+   - Are there any **dependencies** on other fields?  
+
+🔹 **Step 3: Explore Edge Cases & Validations**  
+   - What are the input constraints (min/max length, special characters, formats)?  
+   - How does the system handle unexpected inputs?  
+
+🔹 **Step 4: Consider UI/UX Aspects**  
+   - Is the element **properly aligned and readable**?  
+   - Are tooltips, placeholders, and labels **clear and informative**?  
+
+🔹 **Step 5: Ensure Accessibility & Security**  
+   - Does it support **keyboard navigation**?  
+   - Does it prevent **SQL Injection/XSS attacks**?  
+
+---
+
+### **Test Case Format:**  
+- **Test Case Title:** (Concise description)  
+- **Preconditions:** (If any)  
+- **Test Steps:** (Step-by-step execution steps)  
+- **Expected Result:** (What should happen if the test passes)  
+
+---
+
+### **Example Test Cases with Thought Process Applied:**  
+**1️⃣ Test Case Title:** Validate Email Field with Invalid Input  
+   - **Thought Process:**  
+     - Email fields should only accept valid formats.  
+     - Some common invalid formats: `test@`, `@test.com`, `test@com`, `test@.com`.  
+   - **Preconditions:** User is on the login page.  
+   - **Test Steps:**  
+     1. Enter `invalid-email` in the email field.  
+     2. Click the **Submit** button.  
+   - **Expected Result:** The system should display an error message: `"Please enter a valid email address"`.  
+
+---
+
+**2️⃣ Test Case Title:** Verify Required Field Behavior  
+   - **Thought Process:**  
+     - The field is marked **required**, meaning submission should fail if left empty.  
+   - **Preconditions:** User is on the login page.  
+   - **Test Steps:**  
+     1. Leave the email field blank.  
+     2. Click the **Submit** button.  
+   - **Expected Result:** The system should display an error message: `"This field is required"`.  
+
+---
+
+**3️⃣ Test Case Title:** Validate Email Field with Maximum Length  
+   - **Thought Process:**  
+     - If the email field has a **maxlength limit**, the system should prevent excessive input.  
+     - If no limit is set, a very long email might break UI or cause unexpected behavior.  
+   - **Preconditions:** User is on the login page.  
+   - **Test Steps:**  
+     1. Enter a long email exceeding 255 characters.  
+     2. Click the **Submit** button.  
+   - **Expected Result:** The system should either **restrict further input** beyond the max limit or show an **error message**.  
+
+---
+
+💡 **Now, generate at least 10 test cases using this structured approach!**  
+
