@@ -359,3 +359,172 @@ Generate HTML/PDF reports for better visualization.
 UI for Non-Technical Users:
 
 Create a simple frontend where users can define and execute tests interactively.
+
+
+#############################
+You are a highly skilled test engineer specializing in manual testing.  
+Generate manual test cases for the following UI element using the information provided:  
+
+Element Details:  
+- **Tag**: {element['tag']}  
+- **ID**: {element['id']}  
+- **Name**: {element['name']}  
+- **Text/Label**: {element['text']}  
+- **Type**: {element['type']}  
+- **Placeholder**: {element['placeholder']}  
+- **Disabled**: {element['disabled']}  
+- **Required**: {element['required']}  
+- **Max Length**: {element['maxlength']}  
+- **Href (if applicable)**: {element['href']}  
+
+### **Test Cases Should Include:**  
+1️⃣ **Basic functionality** (Verify expected behavior)  
+2️⃣ **Validation rules** (Required field, max length, invalid inputs)  
+3️⃣ **Edge cases** (Empty input, long text, special characters, SQL injection)  
+4️⃣ **UI behavior** (Visibility, responsiveness, disabled/enabled states)  
+5️⃣ **Accessibility testing** (Keyboard navigation, screen reader support, ARIA labels)  
+6️⃣ **Security testing** (Prevent XSS, SQL injection, CSRF)  
+7️⃣ **Error messages** (Ensure correct messages for incorrect inputs)  
+8️⃣ **Usability** (Check tooltip, placeholder guidance, field grouping)  
+
+**Format Output in a Structured Table:**  
+
+| **Test ID**  | **Test Scenario** | **Steps** | **Expected Result** |
+|-------------|------------------|-----------|----------------------|
+
+Provide at least **10** well-structured test cases.
+######################3
+You are an expert in **UI validation testing**.  
+Generate **detailed** manual test cases for an **input field** based on the following details:  
+
+- **Field Type**: {element['type']}  
+- **Label**: {element['text']}  
+- **Placeholder**: {element['placeholder']}  
+- **Required**: {element['required']}  
+- **Max Length**: {element['maxlength']}  
+- **Error messages (if extracted from DOM)**: {element.get('error_messages', 'Not available')}  
+
+### **Test Cases Should Cover:**  
+✔ **Valid input scenarios** (Expected user input)  
+✔ **Invalid input scenarios** (Edge cases, empty input, special characters, numbers in name fields, etc.)  
+✔ **Field constraints** (Max length, required field validation)  
+✔ **Security tests** (XSS, SQL injection protection)  
+✔ **Error handling** (Correct error messages)  
+✔ **Accessibility** (Screen reader reads correct label)  
+
+Format test cases as a structured table with the following columns:  
+
+| **Test ID**  | **Test Case Description** | **Test Steps** | **Expected Outcome** |
+|-------------|-------------------------|--------------|----------------------|
+
+Provide at least **10** structured test cases.
+#####################
+You are a UI and functional testing expert.  
+Generate **manual test cases** for a **button** using the following details:  
+
+- **Button Text**: {element['text']}  
+- **ID**: {element['id']}  
+- **Disabled State**: {element['disabled']}  
+- **Expected Action**: (e.g., submit form, navigate to another page)  
+
+### **Test Cases Should Cover:**  
+✅ **Button Click Functionality** (Enabled/Disabled state)  
+✅ **Keyboard Navigation** (Press Enter/Spacebar to activate)  
+✅ **Negative Scenarios** (Click when form is incomplete)  
+✅ **Usability** (Hover effects, tooltip, proper cursor change)  
+✅ **Security** (Check if button triggers any unauthorized action)  
+
+Provide **at least 8 test cases** in a structured table format.
+##################
+You are an expert in testing website navigation and UI interactions.  
+Generate **manual test cases** for a **hyperlink** based on the following details:  
+
+- **Link Text**: {element['text']}  
+- **URL (Href)**: {element['href']}  
+- **Target Attribute**: (_blank, _self)  
+
+### **Test Cases Should Cover:**  
+1️⃣ **Basic Functionality** (Click the link and verify it navigates to the correct URL)  
+2️⃣ **Security Tests** (Ensure no redirections to phishing/malicious sites)  
+3️⃣ **Link Behavior in Different Browsers**  
+4️⃣ **Link Opening Behavior** (New tab vs. same window)  
+5️⃣ **Keyboard Accessibility** (TAB navigation, Enter key activation)  
+
+Provide **at least 5 test cases** in a structured format.
+##################
+You are an expert in **UI validation and accessibility testing**.  
+Generate **manual test cases** for a **dropdown/checkbox** using the following details:  
+
+- **Field Label**: {element['text']}  
+- **ID**: {element['id']}  
+- **Options Available**: {element.get('options', 'Not available')}  
+- **Default Selected Option**: {element.get('default_selected', 'None')}  
+
+### **Test Cases Should Cover:**  
+✔ **Dropdown Selection Behavior** (Select valid/invalid options)  
+✔ **Keyboard Navigation** (Use arrow keys to navigate)  
+✔ **Default Value Verification**  
+✔ **Multi-Select Behavior (if applicable)**  
+✔ **Negative Scenarios** (Leaving the field blank if required)  
+✔ **Accessibility Tests** (Screen readers, ARIA labels)  
+
+Provide **at least 8 test cases** in a structured table format.
+##########################
+import openai
+import json
+
+def generate_jira_test_cases(ui_elements):
+    """Generate Jira-compatible test cases based on UI elements."""
+    jira_test_cases = []
+
+    for element in ui_elements:
+        prompt = f"""
+        Generate structured manual test cases for Jira for the following UI element:
+
+        **Element Details:**
+        - **Tag:** {element['tag']}
+        - **ID:** {element['id']}
+        - **Name:** {element['name']}
+        - **Text/Label:** {element['text']}
+        - **Type:** {element['type']}
+        - **Placeholder:** {element['placeholder']}
+        - **Disabled:** {element['disabled']}
+        - **Required:** {element['required']}
+        - **Max Length:** {element['maxlength']}
+        - **Href (if applicable):** {element['href']}
+
+        **Test Cases Should Cover:**
+        ✅ Functional testing  
+        ✅ Edge cases & validation rules  
+        ✅ Accessibility testing  
+        ✅ Security testing (XSS, SQL Injection)  
+
+        **Format Output as a JSON Object with these fields:**
+        - `summary` (Test case title)
+        - `test_id` (Unique ID, e.g., WEALTH-TEST-001)
+        - `component` (e.g., Login Page)
+        - `priority` (High/Medium/Low)
+        - `labels` (e.g., UI, Validation)
+        - `steps` (Step-by-step instructions)
+        - `expected_result` (What should happen)
+        """
+
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[{"role": "system", "content": "You are an expert QA engineer."},
+                      {"role": "user", "content": prompt}]
+        )
+
+        jira_test_case = json.loads(response["choices"][0]["message"]["content"])
+        jira_test_cases.append(jira_test_case)
+
+    return jira_test_cases
+
+# Example usage
+ui_elements = [
+    {"tag": "input", "id": "email", "name": "email", "text": "Email", "type": "text",
+     "placeholder": "Enter your email", "disabled": False, "required": True, "maxlength": 50, "href": None}
+]
+
+jira_cases = generate_jira_test_cases(ui_elements)
+print(json.dumps(jira_cases, indent=2))
