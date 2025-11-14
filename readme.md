@@ -623,3 +623,174 @@ You are an expert QA engineer specializing in manual testing. Your goal is to an
 
 💡 **Now, generate at least 10 test cases using this structured approach!**  
 
+# client_probe.py
+import asyncio
+from fastmcp import Client
+
+async def main():
+    async with Client("http://localhost:8000/mcp") as c:
+        tools = await c.list_tools()
+        print(f"Tools available: {[t.name for t in tools]}")
+        res = await c.call_tool("add", {"a": 2, "b": 3})
+        print(f"Result of add tool: {res.content[0].text}")
+
+asyncio.run(main())
+
+# OpenAI client with MCP tool integration
+import asyncio
+import json
+from openai import OpenAI
+from fastmcp import Client as MCPClient
+
+# load openai api key from environment variable
+import os
+import dotenv
+dotenv.load_dotenv()
+
+# Initialize OpenAI client
+openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+
+openai sample###################################################
+# MCP server URL
+MCP_SERVER_URL = "http://localhost:8000/mcp"
+
+async def get_mcp_tools():
+    """Fetch available tools from MCP server"""
+    try:
+        async with MCPClient(MCP_SERVER_URL) as mcp_client:
+            tools = await mcp_client.list_tools()
+            return tools
+    except Exception as e:
+        print(f"Error connecting to MCP server: {e}")
+        return []
+
+def convert_mcp_tools_to_openai_format(mcp_tools):
+    """Convert MCP tools to OpenAI function calling format"""
+    openai_tools = []
+    for tool in mcp_tools:
+        openai_tools.append({
+            "type": "function",
+            "function": {
+                "name": tool.name,
+                "description": tool.description,
+                "parameters": {
+                    "type": "object",
+                    "properties": tool.inputSchema.get("properties", {}),
+                    "required": tool.inputSchema.get("required", [])
+                }
+            }
+        })
+    return openai_tools
+
+async def call_mcp_tool(tool_name: str, tool_input: dict):
+    """Call a tool from the MCP server"""
+    try:
+        async with MCPClient(MCP_SERVER_URL) as mcp_client:
+            result = await mcp_client.call_tool(tool_name, tool_input)
+            return result.content[0].text if result.content else "No result"
+    except Exception as e:
+        return f"Error calling MCP tool: {e}"
+
+async def chat_with_mcp_tools(user_message: str):
+    """Send a message to OpenAI and handle tool calls"""
+    # Get MCP tools
+    mcp_tools = await get_mcp_tools()
+    if not mcp_tools:
+        print("Warning: No MCP tools available")
+        openai_tools = []
+    else:
+        openai_tools = convert_mcp_tools_to_openai_format(mcp_tools)
+    
+    messages = [{"role": "user", "content": user_message}]
+    
+    # Initial request to OpenAI
+    response = openai_client.chat.completions.create(
+        model="gpt-4o",
+        messages=messages,
+        tools=openai_tools if openai_tools else None,
+        tool_choice="auto" if openai_tools else None
+    )
+    
+    # Handle tool calls in a loop
+    while response.choices[0].finish_reason == "tool_calls":
+        # Process each tool call
+        for tool_call in response.choices[0].message.tool_calls:
+            tool_name = tool_call.function.name
+            tool_input = json.loads(tool_call.function.arguments)
+            
+            print(f"\n[Tool Call] {tool_name} with input: {tool_input}")
+            
+            # Call the MCP tool
+            tool_result = await call_mcp_tool(tool_name, tool_input)
+            print(f"[Tool Result] {tool_result}")
+            
+            # Add assistant response and tool result to messages
+            messages.append({"role": "assistant", "content": response.choices[0].message.content or ""})
+            messages.append({
+                "role": "user",
+                "content": f"Tool {tool_name} returned: {tool_result}"
+            })
+        
+        # Get next response from OpenAI
+        response = openai_client.chat.completions.create(
+            model="gpt-4o",
+            messages=messages,
+            tools=openai_tools if openai_tools else None,
+            tool_choice="auto" if openai_tools else None
+        )
+    
+    # Return the final response
+    return response.choices[0].message.content
+
+async def main():
+    # Test with different questions
+    questions = [
+        "What is Python?",
+        "Can you add 5 and 3?",
+        "Echo the word 'hello'",
+    ]
+    
+    for question in questions:
+        print(f"\n{'='*60}")
+        print(f"Question: {question}")
+        print('='*60)
+        try:
+            answer = await chat_with_mcp_tools(question)
+            print(f"\nFinal Answer: {answer}")
+        except Exception as e:
+            print(f"Error: {e}")
+
+if __name__ == "__main__":
+    asyncio.run(main())
+
+
+##############################
+server
+##################################
+# server.py
+from fastmcp import FastMCP
+
+mcp = FastMCP("Example Remote MCP")
+
+@mcp.tool
+def add(a: int, b: int) -> int:
+    """Add two integers."""
+    return a + b
+
+@mcp.tool
+def echo(message: str, uppercase: bool = False) -> str:
+    """Echo a message, optionally uppercased."""
+    return message.upper() if uppercase else message
+
+# Optional: a simple read-only resource
+@mcp.resource("config://version")
+def version():
+    """Server version string."""
+    return "1.0.0"
+
+if __name__ == "__main__":
+    # Expose as a REMOTE HTTP MCP endpoint:
+    # Your endpoint will be http://localhost:8000/mcp
+    mcp.run(transport="http", host="0.0.0.0", port=8000)
+
